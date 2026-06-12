@@ -1,0 +1,88 @@
+import { History, GitPullRequest, CheckCircle, XCircle, AlertTriangle, User } from 'lucide-react';
+import { useAppStore } from '@/store';
+import { formatDateTime, truncateText } from '@/utils';
+import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components';
+import type { HistoryRecord } from '@/types';
+
+const getActionIcon = (action: string) => {
+  switch (action) {
+    case '创建评审':
+      return <GitPullRequest className="w-4 h-4 text-primary-400" />;
+    case '评审通过':
+      return <CheckCircle className="w-4 h-4 text-severity-info" />;
+    case '评审拒绝':
+      return <XCircle className="w-4 h-4 text-severity-blocker" />;
+    case '发现问题':
+      return <AlertTriangle className="w-4 h-4 text-severity-critical" />;
+    default:
+      return <History className="w-4 h-4 text-dark-400" />;
+  }
+};
+
+const getActionColor = (action: string) => {
+  switch (action) {
+    case '创建评审':
+      return 'bg-primary-500/20 border-primary-500/30 text-primary-400';
+    case '评审通过':
+      return 'bg-severity-info/20 border-severity-info/30 text-severity-info';
+    case '评审拒绝':
+      return 'bg-severity-blocker/20 border-severity-blocker/30 text-severity-blocker';
+    case '发现问题':
+      return 'bg-severity-critical/20 border-severity-critical/30 text-severity-critical';
+    default:
+      return 'bg-dark-800/50 border-dark-700/50 text-dark-300';
+  }
+};
+
+export default function HistoryList() {
+  const { historyRecords } = useAppStore();
+
+  return (
+    <Card className="glass-card glass-card-hover">
+      <CardHeader className="border-b border-dark-700/50">
+        <div className="flex items-center gap-2">
+          <History className="w-5 h-5 text-primary-400" />
+          <CardTitle className="text-dark-100">评审历史记录</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="relative">
+          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-dark-700/50" />
+          <div className="space-y-6">
+            {historyRecords.map((record: HistoryRecord, index: number) => (
+              <div key={record.id} className="relative pl-10 animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                <div className="absolute left-2 top-1 w-5 h-5 rounded-full bg-dark-800 border-2 border-dark-600 flex items-center justify-center">
+                  {getActionIcon(record.action)}
+                </div>
+                <div className="bg-dark-800/30 rounded-lg p-4 hover:bg-dark-800/60 transition-colors border border-transparent hover:border-primary-500/30">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        className={`border ${getActionColor(record.action)}`}
+                      >
+                        {record.action}
+                      </Badge>
+                      <span className="text-sm text-dark-400">
+                        {formatDateTime(record.createdAt)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-sm text-dark-400">
+                      <User className="w-4 h-4" />
+                      <span>{record.userName}</span>
+                    </div>
+                  </div>
+                  <h4 className="font-medium text-dark-100 mb-1">{record.reviewTitle}</h4>
+                  {record.details && (
+                    <p className="text-sm text-dark-300">
+                      {truncateText(record.details, 100)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

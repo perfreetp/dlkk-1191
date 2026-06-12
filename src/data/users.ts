@@ -1,0 +1,66 @@
+import type { User } from '../types';
+
+export const mockUsers: User[] = [
+  {
+    id: 'user-1',
+    username: 'zhangsan',
+    name: '张三',
+    email: 'zhangsan@example.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zhangsan',
+    role: '技术负责人',
+    department: '技术部',
+    createdAt: '2023-01-15T10:00:00Z',
+  },
+  {
+    id: 'user-2',
+    username: 'lisi',
+    name: '李四',
+    email: 'lisi@example.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lisi',
+    role: '高级开发工程师',
+    department: '技术部',
+    createdAt: '2023-03-20T09:30:00Z',
+  },
+  {
+    id: 'user-3',
+    username: 'wangwu',
+    name: '王五',
+    email: 'wangwu@example.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=wangwu',
+    role: '开发工程师',
+    department: '技术部',
+    createdAt: '2023-06-10T14:00:00Z',
+  },
+  {
+    id: 'user-4',
+    username: 'zhaoliu',
+    name: '赵六',
+    email: 'zhaoliu@example.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zhaoliu',
+    role: '前端开发工程师',
+    department: '前端组',
+    createdAt: '2023-08-05T11:20:00Z',
+  },
+  {
+    id: 'user-5',
+    username: 'sunqi',
+    name: '孙七',
+    email: 'sunqi@example.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sunqi',
+    role: '测试工程师',
+    department: '质量部',
+    createdAt: '2023-11-01T16:45:00Z',
+  },
+  {
+    id: 'user-6',
+    username: 'zhouba',
+    name: '周八',
+    email: 'zhouba@example.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zhouba',
+    role: '安全工程师',
+    department: '安全部',
+    createdAt: '2024-01-20T08:00:00Z',
+  },
+];
+
+export const defaultCurrentUserId = 'user-1';

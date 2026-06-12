@@ -1,0 +1,94 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import "prismjs/themes/prism-tomorrow.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  @apply bg-dark-950 text-dark-100 font-sans antialiased;
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-dark-900/80 backdrop-blur-sm border border-dark-700/50;
+  }
+
+  .glass-card-hover {
+    @apply hover:bg-dark-800/80 hover:border-primary-500/30 transition-all duration-300;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #334e68 transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #334e68;
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #486581;
+  }
+
+  .bg-grid {
+    background-image: linear-gradient(
+        rgba(57, 117, 226, 0.05) 1px,
+        transparent 1px
+      ),
+      linear-gradient(90deg, rgba(57, 117, 226, 0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .code-line-highlight {
+    @apply bg-severity-critical/20 border-l-2 border-severity-critical;
+  }
+}
+
+pre[class*="language-"] {
+  @apply m-0 rounded-lg bg-dark-950 p-0;
+}
+
+code[class*="language-"] {
+  @apply font-mono text-sm;
+}
+
+.line-numbers .line-numbers-rows {
+  @apply border-r border-dark-700 py-4 pr-2 text-dark-500;
+}
+
+.recharts-polar-grid-angle line,
+.recharts-polar-grid-concentric-circle circle {
+  stroke: #334e68 !important;
+}
+
+.recharts-polar-angle-axis text,
+.recharts-polar-radius-axis text {
+  fill: #829ab1 !important;
+  font-size: 12px;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none;
+}
