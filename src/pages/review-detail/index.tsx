@@ -292,7 +292,15 @@ export default function ReviewDetailPage() {
                 />
               </TabsContent>
               <TabsContent value="tracking">
-                <TrackingTab reviewId={id || review?.id || ''} />
+                <TrackingTab
+                  reviewId={id || review?.id || ''}
+                  onSelectIssueId={setSelectedIssueId}
+                  onJumpToIssue={(issueId) => {
+                    setSelectedIssueId(issueId);
+                    setActiveTab('issues');
+                  }}
+                  disabled={isCompleted}
+                />
               </TabsContent>
               <TabsContent value="risk">
                 <RiskTab reviewId={id || review?.id || ''} />

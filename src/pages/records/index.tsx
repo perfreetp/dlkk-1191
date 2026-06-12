@@ -24,17 +24,29 @@ export default function RecordsPage() {
     setRecordFilter,
     getFilteredReviews,
     getFilteredIssues,
+    getFilteredHistory,
   } = useAppStore();
   const [activeTab, setActiveTab] = useState('statistics');
 
   const filteredReviews = getFilteredReviews(recordFilter);
   const filteredIssues = getFilteredIssues(recordFilter);
+  const filteredHistory = getFilteredHistory(recordFilter);
 
   const completedReviews = filteredReviews.filter(
     (r) => r.status === 'completed' || r.status === 'approved' || r.status === 'rejected'
   ).length;
   const resolvedIssues = filteredIssues.filter((i) => i.status === 'resolved').length;
-  const totalReviewers = new Set(userStats.map((u) => u.userId)).size;
+
+  const reviewerIds = new Set<string>();
+  filteredReviews.forEach((review) => {
+    review.reviewerIds?.forEach((id) => reviewerIds.add(id));
+    review.history?.forEach((h) => reviewerIds.add(h.userId));
+  });
+  filteredHistory.forEach((record) => {
+    if (record.userId) reviewerIds.add(record.userId);
+  });
+  const totalReviewers = reviewerIds.size;
+
   const resolutionRate = filteredIssues.length > 0 ? Math.round((resolvedIssues / filteredIssues.length) * 100) : 0;
 
   const getAverageReviewDuration = () => {

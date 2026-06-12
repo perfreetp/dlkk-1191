@@ -178,6 +178,7 @@ export interface HistoryRecord {
   reviewId: string;
   reviewTitle: string;
   action: string;
+  userId?: string;
   userName: string;
   createdAt: string;
   details: string;

@@ -119,6 +119,7 @@ const mockReviews: Review[] = [
     createdAt: '2026-06-10T10:00:00Z',
     updatedAt: '2026-06-11T14:30:00Z',
     reviewerCount: 3,
+    reviewerIds: ['1', '2', '4'],
     issueCount: 8,
     criticalIssueCount: 2,
     highIssueCount: 2,
@@ -127,11 +128,11 @@ const mockReviews: Review[] = [
     assignee: '张三',
     description: '重构用户认证和权限管理模块',
     history: [
-      { id: 'h1', reviewId: '1', action: 'created', userId: 'u1', comment: '提交评审申请', createdAt: '2026-06-10T10:00:00Z' },
-      { id: 'h2', reviewId: '1', action: 'reviewing', userId: 'u2', comment: '开始评审', createdAt: '2026-06-10T10:30:00Z' },
-      { id: 'h3', reviewId: '1', action: 'issue_found', userId: 'u2', comment: '发现 8 个问题', createdAt: '2026-06-10T14:00:00Z' },
-      { id: 'h4', reviewId: '1', action: 'info_requested', userId: 'u2', comment: '需要补充登录流程的测试用例', createdAt: '2026-06-10T16:00:00Z' },
-      { id: 'h5', reviewId: '1', action: 'info_provided', userId: 'u1', comment: '已补充测试用例', createdAt: '2026-06-11T09:00:00Z' },
+      { id: 'h1', reviewId: '1', action: 'created', userId: '1', comment: '提交评审申请', createdAt: '2026-06-10T10:00:00Z' },
+      { id: 'h2', reviewId: '1', action: 'reviewing', userId: '2', comment: '开始评审', createdAt: '2026-06-10T10:30:00Z' },
+      { id: 'h3', reviewId: '1', action: 'issue_found', userId: '2', comment: '发现 8 个问题', createdAt: '2026-06-10T14:00:00Z' },
+      { id: 'h4', reviewId: '1', action: 'info_requested', userId: '2', comment: '需要补充登录流程的测试用例', createdAt: '2026-06-10T16:00:00Z' },
+      { id: 'h5', reviewId: '1', action: 'info_provided', userId: '1', comment: '已补充测试用例', createdAt: '2026-06-11T09:00:00Z' },
     ],
   },
   {
@@ -146,6 +147,7 @@ const mockReviews: Review[] = [
     completedAt: '2026-06-10T15:00:00Z',
     duration: 1800,
     reviewerCount: 2,
+    reviewerIds: ['3', '4'],
     issueCount: 3,
     criticalIssueCount: 0,
     highIssueCount: 1,
@@ -154,11 +156,11 @@ const mockReviews: Review[] = [
     assignee: '赵开发',
     description: '升级支付网关接口到 v2 版本',
     history: [
-      { id: 'h1', reviewId: '2', action: 'created', userId: 'u3', comment: '提交评审申请', createdAt: '2026-06-09T09:00:00Z' },
-      { id: 'h2', reviewId: '2', action: 'reviewing', userId: 'u4', comment: '开始评审', createdAt: '2026-06-09T10:00:00Z' },
-      { id: 'h3', reviewId: '2', action: 'issue_found', userId: 'u4', comment: '发现 3 个问题', createdAt: '2026-06-09T14:00:00Z' },
-      { id: 'h4', reviewId: '2', action: 'issue_fixed', userId: 'u3', comment: '修复所有问题', createdAt: '2026-06-10T11:00:00Z' },
-      { id: 'h5', reviewId: '2', action: 'approved', userId: 'u4', comment: '评审通过', createdAt: '2026-06-10T15:00:00Z' },
+      { id: 'h1', reviewId: '2', action: 'created', userId: '3', comment: '提交评审申请', createdAt: '2026-06-09T09:00:00Z' },
+      { id: 'h2', reviewId: '2', action: 'reviewing', userId: '4', comment: '开始评审', createdAt: '2026-06-09T10:00:00Z' },
+      { id: 'h3', reviewId: '2', action: 'issue_found', userId: '4', comment: '发现 3 个问题', createdAt: '2026-06-09T14:00:00Z' },
+      { id: 'h4', reviewId: '2', action: 'issue_fixed', userId: '3', comment: '修复所有问题', createdAt: '2026-06-10T11:00:00Z' },
+      { id: 'h5', reviewId: '2', action: 'approved', userId: '4', comment: '评审通过', createdAt: '2026-06-10T15:00:00Z' },
     ],
   },
   {
@@ -173,6 +175,7 @@ const mockReviews: Review[] = [
     completedAt: '2026-06-08T16:00:00Z',
     duration: 4620,
     reviewerCount: 2,
+    reviewerIds: ['1', '2'],
     issueCount: 5,
     criticalIssueCount: 0,
     highIssueCount: 1,
@@ -181,11 +184,11 @@ const mockReviews: Review[] = [
     assignee: '李四',
     description: '优化首页加载速度和渲染性能',
     history: [
-      { id: 'h1', reviewId: '3', action: 'created', userId: 'u2', comment: '提交评审申请', createdAt: '2026-06-05T11:00:00Z' },
-      { id: 'h2', reviewId: '3', action: 'reviewing', userId: 'u1', comment: '开始评审', createdAt: '2026-06-05T14:00:00Z' },
-      { id: 'h3', reviewId: '3', action: 'issue_found', userId: 'u1', comment: '发现 5 个问题', createdAt: '2026-06-05T17:00:00Z' },
-      { id: 'h4', reviewId: '3', action: 'issue_fixed', userId: 'u2', comment: '修复性能问题', createdAt: '2026-06-07T10:00:00Z' },
-      { id: 'h5', reviewId: '3', action: 'approved', userId: 'u1', comment: '评审通过', createdAt: '2026-06-08T16:00:00Z' },
+      { id: 'h1', reviewId: '3', action: 'created', userId: '2', comment: '提交评审申请', createdAt: '2026-06-05T11:00:00Z' },
+      { id: 'h2', reviewId: '3', action: 'reviewing', userId: '1', comment: '开始评审', createdAt: '2026-06-05T14:00:00Z' },
+      { id: 'h3', reviewId: '3', action: 'issue_found', userId: '1', comment: '发现 5 个问题', createdAt: '2026-06-05T17:00:00Z' },
+      { id: 'h4', reviewId: '3', action: 'issue_fixed', userId: '2', comment: '修复性能问题', createdAt: '2026-06-07T10:00:00Z' },
+      { id: 'h5', reviewId: '3', action: 'approved', userId: '1', comment: '评审通过', createdAt: '2026-06-08T16:00:00Z' },
     ],
   },
 ];
@@ -203,13 +206,14 @@ const mockIssues: Issue[] = [
     code: `const query = \`SELECT * FROM users WHERE id = \${userId}\`;`,
     ruleId: '1',
     assignee: '李四',
+    assigneeId: '2',
     createdAt: '2026-06-10T11:00:00Z',
     updatedAt: '2026-06-10T11:00:00Z',
     comments: [
       {
         id: 'c1',
         issueId: '1',
-        userId: 'u1',
+        userId: '1',
         userName: '王审查',
         content: '这里必须使用参数化查询，请尽快修复。',
         createdAt: '2026-06-10T11:30:00Z',
@@ -228,6 +232,7 @@ const mockIssues: Issue[] = [
     code: `console.log('Login attempt:', { email, passwordHash });`,
     ruleId: '2',
     assignee: '张三',
+    assigneeId: '1',
     createdAt: '2026-06-10T11:30:00Z',
     updatedAt: '2026-06-11T09:00:00Z',
     comments: [],
@@ -243,6 +248,8 @@ const mockIssues: Issue[] = [
     line: 67,
     code: `const { data } = await axios.get('/api/users');`,
     ruleId: '3',
+    assignee: '张三',
+    assigneeId: '1',
     createdAt: '2026-06-10T12:00:00Z',
     updatedAt: '2026-06-10T12:00:00Z',
     comments: [],
@@ -259,6 +266,7 @@ const mockIssues: Issue[] = [
     code: `const user: any = response.data;`,
     ruleId: '4',
     assignee: '王五',
+    assigneeId: '3',
     createdAt: '2026-06-10T13:00:00Z',
     updatedAt: '2026-06-10T13:00:00Z',
     comments: [],
@@ -275,13 +283,14 @@ const mockIssues: Issue[] = [
     code: `function validateLogin(username, password, token, rememberMe, deviceId) { ... }`,
     ruleId: '5',
     assignee: '张三',
+    assigneeId: '1',
     createdAt: '2026-06-10T13:30:00Z',
     updatedAt: '2026-06-10T15:00:00Z',
     comments: [
       {
         id: 'c2',
         issueId: '5',
-        userId: 'u2',
+        userId: '2',
         userName: '李审阅',
         content: '建议拆分成多个小函数。',
         createdAt: '2026-06-10T14:00:00Z',
@@ -299,6 +308,8 @@ const mockIssues: Issue[] = [
     line: 45,
     code: `// 重复的用户格式化逻辑`,
     ruleId: '4',
+    assignee: '李四',
+    assigneeId: '2',
     createdAt: '2026-06-10T14:00:00Z',
     updatedAt: '2026-06-10T14:00:00Z',
     comments: [],
@@ -313,6 +324,8 @@ const mockIssues: Issue[] = [
     file: 'src/utils/permissions.ts',
     line: 12,
     code: `export function checkPermission(user, resource) { ... }`,
+    assignee: '张三',
+    assigneeId: '1',
     createdAt: '2026-06-10T14:30:00Z',
     updatedAt: '2026-06-10T14:30:00Z',
     comments: [],
@@ -329,6 +342,7 @@ const mockIssues: Issue[] = [
     code: `const user_data = useUser();`,
     ruleId: '4',
     assignee: '李四',
+    assigneeId: '2',
     createdAt: '2026-06-10T15:00:00Z',
     updatedAt: '2026-06-11T10:00:00Z',
     comments: [],
@@ -345,13 +359,14 @@ const mockIssues: Issue[] = [
     code: `router.post('/callback', (req, res) => { ... })`,
     ruleId: '1',
     assignee: '赵开发',
+    assigneeId: '3',
     createdAt: '2026-06-09T11:00:00Z',
     updatedAt: '2026-06-10T12:00:00Z',
     comments: [
       {
         id: 'c3',
         issueId: '9',
-        userId: 'u4',
+        userId: '4',
         userName: '钱审查',
         content: '必须添加签名验证逻辑。',
         createdAt: '2026-06-09T11:30:00Z',
@@ -359,7 +374,7 @@ const mockIssues: Issue[] = [
       {
         id: 'c4',
         issueId: '9',
-        userId: 'u3',
+        userId: '3',
         userName: '赵开发',
         content: '已修复，添加了 HMAC 签名验证。',
         createdAt: '2026-06-10T12:00:00Z',
@@ -377,6 +392,7 @@ const mockIssues: Issue[] = [
     line: 34,
     code: `PAYMENT_FAILED = 1001`,
     assignee: '赵开发',
+    assigneeId: '3',
     createdAt: '2026-06-09T13:00:00Z',
     updatedAt: '2026-06-10T10:00:00Z',
     comments: [],
@@ -392,6 +408,7 @@ const mockIssues: Issue[] = [
     line: 78,
     code: `function createPaymentOrder(params) { ... }`,
     assignee: '赵开发',
+    assigneeId: '3',
     createdAt: '2026-06-09T14:00:00Z',
     updatedAt: '2026-06-10T09:00:00Z',
     comments: [],
@@ -408,6 +425,7 @@ const mockIssues: Issue[] = [
     code: `<img src={bannerUrl} alt="banner" />`,
     ruleId: '3',
     assignee: '李四',
+    assigneeId: '2',
     createdAt: '2026-06-05T14:00:00Z',
     updatedAt: '2026-06-07T14:00:00Z',
     comments: [],
@@ -423,6 +441,7 @@ const mockIssues: Issue[] = [
     line: 45,
     code: `{products.map(p => <ProductCard key={p.id} product={p} />)}`,
     assignee: '李四',
+    assigneeId: '2',
     createdAt: '2026-06-05T15:00:00Z',
     updatedAt: '2026-06-07T16:00:00Z',
     comments: [],
@@ -438,6 +457,7 @@ const mockIssues: Issue[] = [
     line: 23,
     code: `// 缺少 CDN 配置`,
     assignee: '李四',
+    assigneeId: '2',
     createdAt: '2026-06-05T16:00:00Z',
     updatedAt: '2026-06-07T10:00:00Z',
     comments: [],
@@ -453,6 +473,7 @@ const mockIssues: Issue[] = [
     line: 78,
     code: `.home-page-main-content-banner-wrapper { ... }`,
     assignee: '李四',
+    assigneeId: '2',
     createdAt: '2026-06-05T17:00:00Z',
     updatedAt: '2026-06-06T15:00:00Z',
     comments: [],
@@ -468,6 +489,7 @@ const mockIssues: Issue[] = [
     line: 34,
     code: `console.log('track event:', eventName);`,
     assignee: '李四',
+    assigneeId: '2',
     createdAt: '2026-06-06T10:00:00Z',
     updatedAt: '2026-06-06T16:00:00Z',
     comments: [],
@@ -512,29 +534,29 @@ const mockComplexityTrend: ComplexityData[] = [
 ];
 
 const mockUserStats: UserStats[] = [
-  { userId: '1', userName: '张三', totalIssues: 28, resolvedIssues: 22, inProgressIssues: 4, averageResolutionTime: 24 },
-  { userId: '2', userName: '李四', totalIssues: 35, resolvedIssues: 30, inProgressIssues: 3, averageResolutionTime: 18 },
-  { userId: '3', userName: '王五', totalIssues: 15, resolvedIssues: 10, inProgressIssues: 5, averageResolutionTime: 36 },
-  { userId: '4', userName: '赵六', totalIssues: 42, resolvedIssues: 38, inProgressIssues: 2, averageResolutionTime: 12 },
+  { userId: '1', userName: '王审查', totalIssues: 28, resolvedIssues: 22, inProgressIssues: 4, averageResolutionTime: 24 },
+  { userId: '2', userName: '李审阅', totalIssues: 35, resolvedIssues: 30, inProgressIssues: 3, averageResolutionTime: 18 },
+  { userId: '3', userName: '赵开发', totalIssues: 15, resolvedIssues: 10, inProgressIssues: 5, averageResolutionTime: 36 },
+  { userId: '4', userName: '钱审查', totalIssues: 42, resolvedIssues: 38, inProgressIssues: 2, averageResolutionTime: 12 },
 ];
 
 const mockHistoryRecords: HistoryRecord[] = [
-  { id: '1', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '创建评审', userName: '王审查', createdAt: '2026-06-10T10:00:00Z', details: '提交了 15 个文件待评审' },
-  { id: '2', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '开始评审', userName: '李审阅', createdAt: '2026-06-10T10:30:00Z', details: '李审阅开始进行代码评审' },
-  { id: '3', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '发现问题', userName: '李审阅', createdAt: '2026-06-10T14:00:00Z', details: '发现 8 个问题，其中 2 个严重，2 个高优先级' },
-  { id: '4', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '要求补充', userName: '李审阅', createdAt: '2026-06-10T16:00:00Z', details: '需要补充登录流程的测试用例' },
-  { id: '5', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '补充信息', userName: '王审查', createdAt: '2026-06-11T09:00:00Z', details: '已补充测试用例和相关文档' },
-  { id: '6', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '添加评论', userName: '李审阅', createdAt: '2026-06-11T14:30:00Z', details: '在 SQL 注入问题下添加了评论' },
-  { id: '7', reviewId: '2', reviewTitle: '支付接口升级评审', action: '创建评审', userName: '赵开发', createdAt: '2026-06-09T09:00:00Z', details: '提交了 8 个文件待评审' },
-  { id: '8', reviewId: '2', reviewTitle: '支付接口升级评审', action: '开始评审', userName: '钱审查', createdAt: '2026-06-09T10:00:00Z', details: '钱审查开始进行代码评审' },
-  { id: '9', reviewId: '2', reviewTitle: '支付接口升级评审', action: '发现问题', userName: '钱审查', createdAt: '2026-06-09T14:00:00Z', details: '发现 3 个问题，其中 1 个高优先级' },
-  { id: '10', reviewId: '2', reviewTitle: '支付接口升级评审', action: '修复问题', userName: '赵开发', createdAt: '2026-06-10T11:00:00Z', details: '已修复所有问题' },
-  { id: '11', reviewId: '2', reviewTitle: '支付接口升级评审', action: '评审通过', userName: '钱审查', createdAt: '2026-06-10T15:00:00Z', details: '所有问题已修复，评审通过' },
-  { id: '12', reviewId: '3', reviewTitle: '首页性能优化', action: '创建评审', userName: '李四', createdAt: '2026-06-05T11:00:00Z', details: '提交了 12 个文件待评审' },
-  { id: '13', reviewId: '3', reviewTitle: '首页性能优化', action: '开始评审', userName: '王审查', createdAt: '2026-06-05T14:00:00Z', details: '王审查开始进行代码评审' },
-  { id: '14', reviewId: '3', reviewTitle: '首页性能优化', action: '发现问题', userName: '王审查', createdAt: '2026-06-05T17:00:00Z', details: '发现 5 个性能优化问题' },
-  { id: '15', reviewId: '3', reviewTitle: '首页性能优化', action: '修复问题', userName: '李四', createdAt: '2026-06-07T10:00:00Z', details: '优化了图片加载和列表渲染' },
-  { id: '16', reviewId: '3', reviewTitle: '首页性能优化', action: '评审通过', userName: '王审查', createdAt: '2026-06-08T16:00:00Z', details: '性能提升明显，评审通过' },
+  { id: '1', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '创建评审', userId: '1', userName: '王审查', createdAt: '2026-06-10T10:00:00Z', details: '提交了 15 个文件待评审' },
+  { id: '2', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '开始评审', userId: '2', userName: '李审阅', createdAt: '2026-06-10T10:30:00Z', details: '李审阅开始进行代码评审' },
+  { id: '3', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '发现问题', userId: '2', userName: '李审阅', createdAt: '2026-06-10T14:00:00Z', details: '发现 8 个问题，其中 2 个严重，2 个高优先级' },
+  { id: '4', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '要求补充', userId: '2', userName: '李审阅', createdAt: '2026-06-10T16:00:00Z', details: '需要补充登录流程的测试用例' },
+  { id: '5', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '补充信息', userId: '1', userName: '王审查', createdAt: '2026-06-11T09:00:00Z', details: '已补充测试用例和相关文档' },
+  { id: '6', reviewId: '1', reviewTitle: '用户模块重构代码评审', action: '添加评论', userId: '2', userName: '李审阅', createdAt: '2026-06-11T14:30:00Z', details: '在 SQL 注入问题下添加了评论' },
+  { id: '7', reviewId: '2', reviewTitle: '支付接口升级评审', action: '创建评审', userId: '3', userName: '赵开发', createdAt: '2026-06-09T09:00:00Z', details: '提交了 8 个文件待评审' },
+  { id: '8', reviewId: '2', reviewTitle: '支付接口升级评审', action: '开始评审', userId: '4', userName: '钱审查', createdAt: '2026-06-09T10:00:00Z', details: '钱审查开始进行代码评审' },
+  { id: '9', reviewId: '2', reviewTitle: '支付接口升级评审', action: '发现问题', userId: '4', userName: '钱审查', createdAt: '2026-06-09T14:00:00Z', details: '发现 3 个问题，其中 1 个高优先级' },
+  { id: '10', reviewId: '2', reviewTitle: '支付接口升级评审', action: '修复问题', userId: '3', userName: '赵开发', createdAt: '2026-06-10T11:00:00Z', details: '已修复所有问题' },
+  { id: '11', reviewId: '2', reviewTitle: '支付接口升级评审', action: '评审通过', userId: '4', userName: '钱审查', createdAt: '2026-06-10T15:00:00Z', details: '所有问题已修复，评审通过' },
+  { id: '12', reviewId: '3', reviewTitle: '首页性能优化', action: '创建评审', userId: '2', userName: '李四', createdAt: '2026-06-05T11:00:00Z', details: '提交了 12 个文件待评审' },
+  { id: '13', reviewId: '3', reviewTitle: '首页性能优化', action: '开始评审', userId: '1', userName: '王审查', createdAt: '2026-06-05T14:00:00Z', details: '王审查开始进行代码评审' },
+  { id: '14', reviewId: '3', reviewTitle: '首页性能优化', action: '发现问题', userId: '1', userName: '王审查', createdAt: '2026-06-05T17:00:00Z', details: '发现 5 个性能优化问题' },
+  { id: '15', reviewId: '3', reviewTitle: '首页性能优化', action: '修复问题', userId: '2', userName: '李四', createdAt: '2026-06-07T10:00:00Z', details: '优化了图片加载和列表渲染' },
+  { id: '16', reviewId: '3', reviewTitle: '首页性能优化', action: '评审通过', userId: '1', userName: '王审查', createdAt: '2026-06-08T16:00:00Z', details: '性能提升明显，评审通过' },
 ];
 
 const mockIssueTemplates: IssueTemplate[] = [
@@ -1088,6 +1110,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     return state.reviews.filter((review) => {
       if (filters.repositoryId && review.repositoryId !== filters.repositoryId) return false;
       if (filters.status && review.status !== filters.status) return false;
+      if (filters.reviewerId) {
+        const hasReviewer = review.reviewerIds?.includes(filters.reviewerId);
+        const hasHistoryAction = review.history?.some((h) => h.userId === filters.reviewerId);
+        if (!hasReviewer && !hasHistoryAction) return false;
+      }
       if (filters.startDate) {
         const reviewDate = review.completedAt || review.updatedAt;
         if (new Date(reviewDate) < new Date(filters.startDate)) return false;
@@ -1111,13 +1138,69 @@ export const useAppStore = create<AppState>((set, get) => ({
   getFilteredHistory: (filters) => {
     const state = get();
     const filteredReviewIds = new Set(state.getFilteredReviews(filters).map((r) => r.id));
-    return state.historyRecords.filter((record) => filteredReviewIds.has(record.reviewId));
+    return state.historyRecords.filter((record) => {
+      if (!filteredReviewIds.has(record.reviewId)) return false;
+      if (filters.reviewerId && record.userId !== filters.reviewerId) return false;
+      return true;
+    });
   },
 
   getFilteredUserStats: (filters) => {
     const state = get();
-    if (!filters.reviewerId) return state.userStats;
-    return state.userStats.filter((u) => u.userId === filters.reviewerId);
+    const filteredReviews = state.getFilteredReviews(filters);
+    const filteredReviewIds = new Set(filteredReviews.map((r) => r.id));
+    const filteredIssues = state.issues.filter((issue) => filteredReviewIds.has(issue.reviewId || ''));
+
+    const userMap = new Map<string, { userId: string; userName: string; totalIssues: number; resolvedIssues: number; inProgressIssues: number; resolutionTimes: number[] }>();
+
+    state.userStats.forEach((user) => {
+      userMap.set(user.userId, {
+        userId: user.userId,
+        userName: user.userName,
+        totalIssues: 0,
+        resolvedIssues: 0,
+        inProgressIssues: 0,
+        resolutionTimes: [],
+      });
+    });
+
+    filteredIssues.forEach((issue) => {
+      const userId = issue.assigneeId;
+      if (!userId || !userMap.has(userId)) return;
+
+      const userData = userMap.get(userId)!;
+      userData.totalIssues++;
+
+      if (issue.status === 'resolved') {
+        userData.resolvedIssues++;
+        const createdAt = new Date(issue.createdAt).getTime();
+        const updatedAt = new Date(issue.updatedAt).getTime();
+        const resolutionHours = Math.round((updatedAt - createdAt) / (1000 * 60 * 60));
+        userData.resolutionTimes.push(resolutionHours);
+      } else if (issue.status === 'in_progress') {
+        userData.inProgressIssues++;
+      }
+    });
+
+    const result: UserStats[] = [];
+    userMap.forEach((userData) => {
+      if (filters.reviewerId && userData.userId !== filters.reviewerId) return;
+      
+      const averageResolutionTime = userData.resolutionTimes.length > 0
+        ? Math.round(userData.resolutionTimes.reduce((a, b) => a + b, 0) / userData.resolutionTimes.length)
+        : 0;
+
+      result.push({
+        userId: userData.userId,
+        userName: userData.userName,
+        totalIssues: userData.totalIssues,
+        resolvedIssues: userData.resolvedIssues,
+        inProgressIssues: userData.inProgressIssues,
+        averageResolutionTime,
+      });
+    });
+
+    return result;
   },
 
   getIssuesByRuleId: (ruleId) => {

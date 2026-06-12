@@ -184,6 +184,7 @@ export default function IssueDetail({ issueId, onClose, disabled = false }: Issu
         onClose={() => setAssignDialogOpen(false)}
         issueId={issue.id}
         currentAssignee={issue.assignee}
+        disabled={disabled}
       />
     </div>
   );

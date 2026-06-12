@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { UserPlus } from 'lucide-react';
 import { useAppStore } from '@/store';
+import { cn } from '@/utils';
 import { Dialog, DialogHeader, DialogContent, DialogFooter, Button, Select } from '@/components';
 
 interface AssignDialogProps {
@@ -8,6 +9,7 @@ interface AssignDialogProps {
   onClose: () => void;
   issueId: string;
   currentAssignee?: string;
+  disabled?: boolean;
 }
 
 const assignees = [
@@ -18,15 +20,14 @@ const assignees = [
   { id: '5', name: '钱七' },
 ];
 
-export default function AssignDialog({ open, onClose, issueId, currentAssignee }: AssignDialogProps) {
+export default function AssignDialog({ open, onClose, issueId, currentAssignee, disabled = false }: AssignDialogProps) {
   const { assignIssue } = useAppStore();
   const [selectedAssignee, setSelectedAssignee] = useState(currentAssignee || '');
 
   const handleAssign = () => {
-    if (selectedAssignee) {
-      assignIssue(issueId, selectedAssignee);
-      onClose();
-    }
+    if (disabled || !selectedAssignee) return;
+    assignIssue(issueId, selectedAssignee);
+    onClose();
   };
 
   return (
@@ -41,7 +42,8 @@ export default function AssignDialog({ open, onClose, issueId, currentAssignee }
             <Select
               value={selectedAssignee}
               onChange={(e) => setSelectedAssignee(e.target.value)}
-              className="bg-dark-800/50 border-dark-700/50 text-dark-100"
+              disabled={disabled}
+              className="bg-dark-800/50 border-dark-700/50 text-dark-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">请选择</option>
               {assignees.map((user) => (
@@ -75,8 +77,11 @@ export default function AssignDialog({ open, onClose, issueId, currentAssignee }
         </Button>
         <Button
           onClick={handleAssign}
-          disabled={!selectedAssignee}
-          className="bg-primary-500 hover:bg-primary-600 text-white"
+          disabled={disabled || !selectedAssignee}
+          className={cn(
+            'bg-primary-500 hover:bg-primary-600 text-white',
+            disabled && 'opacity-50 cursor-not-allowed'
+          )}
         >
           确认指派
         </Button>

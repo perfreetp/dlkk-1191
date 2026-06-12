@@ -23,6 +23,8 @@ import type { IssueSeverity, Issue } from '@/types';
 interface TrackingTabProps {
   reviewId: string;
   onSelectIssueId: (issueId: string) => void;
+  onJumpToIssue?: (issueId: string) => void;
+  disabled?: boolean;
 }
 
 type GroupByType = 'status' | 'assignee' | 'severity';
@@ -54,7 +56,7 @@ const statusIcons: Record<string, typeof Clock> = {
   closed: XCircle,
 };
 
-export default function TrackingTab({ reviewId, onSelectIssueId }: TrackingTabProps) {
+export default function TrackingTab({ reviewId, onSelectIssueId, onJumpToIssue, disabled = false }: TrackingTabProps) {
   const { issues } = useAppStore();
   const [groupBy, setGroupBy] = useState<GroupByType>('status');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
@@ -118,6 +120,7 @@ export default function TrackingTab({ reviewId, onSelectIssueId }: TrackingTabPr
   };
 
   const toggleGroup = (groupKey: string) => {
+    if (disabled) return;
     setExpandedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
   };
 
@@ -158,7 +161,11 @@ export default function TrackingTab({ reviewId, onSelectIssueId }: TrackingTabPr
             <button
               type="button"
               onClick={() => toggleGroup(status)}
-              className="w-full p-4 hover:bg-dark-800/50 transition-colors text-left"
+              disabled={disabled}
+              className={cn(
+                'w-full p-4 transition-colors text-left',
+                disabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-dark-800/50'
+              )}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
@@ -200,8 +207,16 @@ export default function TrackingTab({ reviewId, onSelectIssueId }: TrackingTabPr
                 {groupIssues.map((issue, issueIndex) => (
                   <div
                     key={issue.id}
-                    onClick={() => onSelectIssueId(issue.id)}
-                    className="p-3 rounded-lg border border-dark-700/50 cursor-pointer transition-all hover:bg-dark-800/50 hover:border-primary-500/30 animate-fade-in"
+                    onClick={() => {
+                      if (disabled) return;
+                      onJumpToIssue?.(issue.id);
+                    }}
+                    className={cn(
+                      'p-3 rounded-lg border border-dark-700/50 transition-all animate-fade-in',
+                      disabled
+                        ? 'cursor-not-allowed opacity-60'
+                        : 'cursor-pointer hover:bg-dark-800/50 hover:border-primary-500/30'
+                    )}
                     style={{ animationDelay: `${issueIndex * 30}ms` }}
                   >
                     <div className="flex items-start justify-between mb-2">
@@ -251,7 +266,11 @@ export default function TrackingTab({ reviewId, onSelectIssueId }: TrackingTabPr
               <button
                 type="button"
                 onClick={() => toggleGroup(assignee)}
-                className="w-full p-4 hover:bg-dark-800/50 transition-colors text-left"
+                disabled={disabled}
+                className={cn(
+                  'w-full p-4 transition-colors text-left',
+                  disabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-dark-800/50'
+                )}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -338,7 +357,11 @@ export default function TrackingTab({ reviewId, onSelectIssueId }: TrackingTabPr
             <button
               type="button"
               onClick={() => toggleGroup(severity)}
-              className="w-full p-4 hover:bg-dark-800/50 transition-colors text-left"
+              disabled={disabled}
+              className={cn(
+                'w-full p-4 transition-colors text-left',
+                disabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-dark-800/50'
+              )}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
@@ -380,8 +403,16 @@ export default function TrackingTab({ reviewId, onSelectIssueId }: TrackingTabPr
                 {groupIssues.map((issue, issueIndex) => (
                   <div
                     key={issue.id}
-                    onClick={() => onSelectIssueId(issue.id)}
-                    className="p-3 rounded-lg border border-dark-700/50 cursor-pointer transition-all hover:bg-dark-800/50 hover:border-primary-500/30 animate-fade-in"
+                    onClick={() => {
+                      if (disabled) return;
+                      onJumpToIssue?.(issue.id);
+                    }}
+                    className={cn(
+                      'p-3 rounded-lg border border-dark-700/50 transition-all animate-fade-in',
+                      disabled
+                        ? 'cursor-not-allowed opacity-60'
+                        : 'cursor-pointer hover:bg-dark-800/50 hover:border-primary-500/30'
+                    )}
                     style={{ animationDelay: `${issueIndex * 30}ms` }}
                   >
                     <div className="flex items-start justify-between mb-2">
@@ -420,11 +451,14 @@ export default function TrackingTab({ reviewId, onSelectIssueId }: TrackingTabPr
         <div className="flex items-center gap-1 p-1 bg-dark-800/50 rounded-lg border border-dark-700/50">
           <button
             type="button"
-            onClick={() => setGroupBy('status')}
+            onClick={() => !disabled && setGroupBy('status')}
+            disabled={disabled}
             className={cn(
               'flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors',
               groupBy === 'status'
                 ? 'bg-primary-500/20 text-primary-400'
+                : disabled
+                ? 'text-dark-500 cursor-not-allowed opacity-60'
                 : 'text-dark-400 hover:text-dark-200'
             )}
           >
@@ -433,11 +467,14 @@ export default function TrackingTab({ reviewId, onSelectIssueId }: TrackingTabPr
           </button>
           <button
             type="button"
-            onClick={() => setGroupBy('assignee')}
+            onClick={() => !disabled && setGroupBy('assignee')}
+            disabled={disabled}
             className={cn(
               'flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors',
               groupBy === 'assignee'
                 ? 'bg-primary-500/20 text-primary-400'
+                : disabled
+                ? 'text-dark-500 cursor-not-allowed opacity-60'
                 : 'text-dark-400 hover:text-dark-200'
             )}
           >
@@ -446,11 +483,14 @@ export default function TrackingTab({ reviewId, onSelectIssueId }: TrackingTabPr
           </button>
           <button
             type="button"
-            onClick={() => setGroupBy('severity')}
+            onClick={() => !disabled && setGroupBy('severity')}
+            disabled={disabled}
             className={cn(
               'flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors',
               groupBy === 'severity'
                 ? 'bg-primary-500/20 text-primary-400'
+                : disabled
+                ? 'text-dark-500 cursor-not-allowed opacity-60'
                 : 'text-dark-400 hover:text-dark-200'
             )}
           >
