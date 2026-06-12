@@ -142,6 +142,7 @@ export interface Review {
   createdAt: string;
   updatedAt: string;
   completedAt?: string;
+  duration?: number;
   reviewerCount?: number;
   issueCount?: number;
   criticalIssueCount?: number;

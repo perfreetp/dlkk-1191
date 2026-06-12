@@ -8,13 +8,14 @@ import StatisticsPanel from './StatisticsPanel';
 import UserStatsTable from './UserStatsTable';
 
 export default function RecordsPage() {
-  const { reviews, issues, userStats } = useAppStore();
+  const { reviews, issues, userStats, getAverageReviewTimeText, getCompletedReviews } = useAppStore();
   const [activeTab, setActiveTab] = useState('statistics');
 
-  const completedReviews = reviews.filter((r) => r.status === 'completed').length;
+  const completedReviews = getCompletedReviews().length;
   const resolvedIssues = issues.filter((i) => i.status === 'resolved').length;
   const totalReviewers = new Set(userStats.map((u) => u.userId)).size;
   const resolutionRate = issues.length > 0 ? Math.round((resolvedIssues / issues.length) * 100) : 0;
+  const averageReviewTime = getAverageReviewTimeText();
 
   const summaryCards = [
     {
@@ -31,6 +32,11 @@ export default function RecordsPage() {
       label: '参与评审',
       value: totalReviewers,
       badge: { text: '位成员', color: 'bg-severity-warning/20 text-severity-warning border border-severity-warning/30' },
+    },
+    {
+      label: '平均评审耗时',
+      value: averageReviewTime,
+      badge: { text: completedReviews > 0 ? '基于已完成' : '暂无数据', color: 'bg-severity-info/20 text-severity-info border border-severity-info/30' },
     },
     {
       label: '平均修复率',
@@ -50,7 +56,7 @@ export default function RecordsPage() {
           <p className="text-dark-400">查看评审历史记录、统计数据和个人绩效</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
           {summaryCards.map((card, index) => (
             <Card key={index} className="glass-card glass-card-hover animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
               <CardContent className="p-4">

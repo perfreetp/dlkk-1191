@@ -1,18 +1,21 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Send } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { formatDateTime } from '@/utils';
 import { Button, Input, Avatar } from '@/components';
-import type { Comment } from '@/types';
 
 interface CommentSectionProps {
-  comments: Comment[];
   issueId: string;
 }
 
-export default function CommentSection({ comments, issueId }: CommentSectionProps) {
-  const { addComment } = useAppStore();
+export default function CommentSection({ issueId }: CommentSectionProps) {
+  const { issues, addComment } = useAppStore();
   const [newComment, setNewComment] = useState('');
+
+  const comments = useMemo(() => {
+    const issue = issues.find((i) => i.id === issueId);
+    return issue?.comments || [];
+  }, [issues, issueId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

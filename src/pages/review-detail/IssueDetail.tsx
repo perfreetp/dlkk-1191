@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { X, UserPlus, Clock, FileText, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { useAppStore, getSeverityText } from '@/store';
 import { formatDateTime, getFileIcon } from '@/utils';
-import { Badge, Button, CodeBlock, Select } from '@/components';
+import { Badge, Button, CodeBlock, Select, Empty } from '@/components';
 import CommentSection from './CommentSection';
 import AssignDialog from './AssignDialog';
-import type { Issue, IssueSeverity } from '@/types';
+import type { IssueSeverity } from '@/types';
 
 interface IssueDetailProps {
-  issue: Issue;
+  issueId: string;
   onClose: () => void;
 }
 
@@ -20,12 +20,17 @@ const severityToTheme: Record<IssueSeverity, string> = {
   info: 'info',
 };
 
-export default function IssueDetail({ issue, onClose }: IssueDetailProps) {
-  const { updateIssueStatus } = useAppStore();
+export default function IssueDetail({ issueId, onClose }: IssueDetailProps) {
+  const { issues, updateIssueStatus } = useAppStore();
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
 
+  const issue = useMemo(
+    () => issues.find((i) => i.id === issueId) || null,
+    [issues, issueId]
+  );
+
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateIssueStatus(issue.id, e.target.value);
+    updateIssueStatus(issueId, e.target.value);
   };
 
   const getSeverityBadgeClass = (severity: IssueSeverity): string => {
@@ -43,6 +48,26 @@ export default function IssueDetail({ issue, onClose }: IssueDetailProps) {
         return <AlertTriangle className="w-4 h-4 text-severity-blocker" />;
     }
   };
+
+  if (!issue) {
+    return (
+      <div className="h-full flex flex-col bg-transparent">
+        <div className="flex items-center justify-between p-4 border-b border-dark-700/50">
+          <h3 className="font-semibold text-dark-100">问题详情</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 hover:bg-dark-800/50 rounded-md transition-colors"
+          >
+            <X className="w-5 h-5 text-dark-400" />
+          </button>
+        </div>
+        <div className="flex-1 flex items-center justify-center p-4">
+          <Empty />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col bg-transparent">
@@ -135,7 +160,7 @@ export default function IssueDetail({ issue, onClose }: IssueDetailProps) {
         </div>
 
         <div>
-          <CommentSection comments={issue.comments} issueId={issue.id} />
+          <CommentSection issueId={issue.id} />
         </div>
       </div>
 

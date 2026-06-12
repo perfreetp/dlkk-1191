@@ -1,5 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { BarChart3, PieChart as PieChartIcon, TrendingUp } from 'lucide-react';
+import { BarChart3, PieChart as PieChartIcon, TrendingUp, Clock } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components';
 
@@ -16,12 +16,15 @@ const chartTooltipStyle = {
 const legendStyle = { color: '#9fb3c8' };
 
 export default function StatisticsPanel() {
-  const { reviews, issues } = useAppStore();
+  const { reviews, issues, getAverageReviewTimeText, getCompletedReviews } = useAppStore();
+
+  const completedReviews = getCompletedReviews();
 
   const statusDistribution = [
     { name: '待评审', value: reviews.filter((r) => r.status === 'pending').length },
     { name: '评审中', value: reviews.filter((r) => r.status === 'in_progress').length },
     { name: '已完成', value: reviews.filter((r) => r.status === 'completed').length },
+    { name: '已通过', value: reviews.filter((r) => r.status === 'approved').length },
     { name: '已拒绝', value: reviews.filter((r) => r.status === 'rejected').length },
   ];
 
@@ -45,6 +48,7 @@ export default function StatisticsPanel() {
   const totalIssues = issues.length;
   const resolvedIssues = issues.filter((i) => i.status === 'resolved').length;
   const resolutionRate = totalIssues > 0 ? Math.round((resolvedIssues / totalIssues) * 100) : 0;
+  const averageReviewTime = getAverageReviewTimeText();
 
   const statCards = [
     {
@@ -54,10 +58,22 @@ export default function StatisticsPanel() {
       bgColor: 'bg-primary-500/20',
     },
     {
+      label: '已完成评审',
+      value: completedReviews.length,
+      icon: <TrendingUp className="w-6 h-6 text-severity-info" />,
+      bgColor: 'bg-severity-info/20',
+    },
+    {
       label: '问题总数',
       value: totalIssues,
       icon: <PieChartIcon className="w-6 h-6 text-severity-blocker" />,
       bgColor: 'bg-severity-blocker/20',
+    },
+    {
+      label: '平均评审耗时',
+      value: averageReviewTime,
+      icon: <Clock className="w-6 h-6 text-severity-warning" />,
+      bgColor: 'bg-severity-warning/20',
     },
     {
       label: '已修复',
@@ -75,7 +91,7 @@ export default function StatisticsPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {statCards.map((card, index) => (
           <Card key={index} className="glass-card glass-card-hover animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
             <CardContent className="p-4">

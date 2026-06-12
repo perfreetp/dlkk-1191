@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AlertTriangle, AlertCircle, Minus, Filter, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { useAppStore, getSeverityText, getStatusText } from '@/store';
 import { groupIssuesBySeverity, formatRelativeTime, truncateText, cn } from '@/utils';
 import { Card, Badge, Select, Empty } from '@/components';
-import type { Issue, IssueSeverity } from '@/types';
+import type { IssueSeverity } from '@/types';
 
 interface IssuesTabProps {
   reviewId: string;
-  onSelectIssue: (issue: Issue) => void;
+  onSelectIssueId: (issueId: string) => void;
   selectedIssueId?: string;
 }
 
@@ -29,7 +29,7 @@ const severityIcons: Record<IssueSeverity, typeof AlertTriangle> = {
   info: Info,
 };
 
-export default function IssuesTab({ reviewId, onSelectIssue, selectedIssueId }: IssuesTabProps) {
+export default function IssuesTab({ reviewId, onSelectIssueId, selectedIssueId }: IssuesTabProps) {
   const { issues } = useAppStore();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expandedGroups, setExpandedGroups] = useState<Record<IssueSeverity, boolean>>({
@@ -40,11 +40,20 @@ export default function IssuesTab({ reviewId, onSelectIssue, selectedIssueId }: 
     info: true,
   });
 
-  const reviewIssues = issues.filter((issue) => issue.reviewId === reviewId);
-  const filteredIssues = reviewIssues.filter(
-    (issue) => statusFilter === 'all' || issue.status === statusFilter
+  const reviewIssues = useMemo(
+    () => issues.filter((issue) => issue.reviewId === reviewId),
+    [issues, reviewId]
   );
-  const groupedIssues = groupIssuesBySeverity(filteredIssues);
+  const filteredIssues = useMemo(
+    () => reviewIssues.filter(
+      (issue) => statusFilter === 'all' || issue.status === statusFilter
+    ),
+    [reviewIssues, statusFilter]
+  );
+  const groupedIssues = useMemo(
+    () => groupIssuesBySeverity(filteredIssues),
+    [filteredIssues]
+  );
 
   const toggleGroup = (severity: IssueSeverity) => {
     setExpandedGroups((prev) => ({ ...prev, [severity]: !prev[severity] }));
@@ -126,7 +135,7 @@ export default function IssuesTab({ reviewId, onSelectIssue, selectedIssueId }: 
                 {groupIssues.map((issue, issueIndex) => (
                   <div
                     key={issue.id}
-                    onClick={() => onSelectIssue(issue)}
+                    onClick={() => onSelectIssueId(issue.id)}
                     className={cn(
                       "p-4 rounded-lg border cursor-pointer transition-all glass-card glass-card-hover animate-fade-in",
                       selectedIssueId === issue.id

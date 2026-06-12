@@ -131,4 +131,16 @@ export const getLinesOfCode = (code: string): number => {
   return code.split('\n').length;
 };
 
+export function formatDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
+  if (hours === 0) {
+    return `${mins}分钟`;
+  }
+  if (mins === 0) {
+    return `${hours}小时`;
+  }
+  return `${hours}小时${mins}分钟`;
+}
+
 export { cn };

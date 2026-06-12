@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { FileText, Plus, Pencil, Trash2, AlertTriangle, AlertCircle, Minus, Info } from 'lucide-react';
 import { useAppStore, getSeverityText } from '@/store';
-import { generateId } from '@/utils';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, Dialog, DialogHeader, DialogContent, DialogFooter, Input, Select } from '@/components';
 import type { IssueTemplate, IssueSeverity } from '@/types';
 
@@ -35,25 +34,31 @@ const getSeverityBadgeColor = (severity: IssueSeverity): string => {
   return colors[severity];
 };
 
+interface TemplateFormData {
+  title: string;
+  description: string;
+  severity: IssueSeverity;
+  category: string;
+}
+
+const initialFormData: TemplateFormData = {
+  title: '',
+  description: '',
+  severity: 'medium',
+  category: '',
+};
+
 export default function TemplateManager() {
-  const { issueTemplates, setIssueTemplates } = useAppStore();
+  const { issueTemplates, addIssueTemplate, updateIssueTemplate, deleteIssueTemplate } = useAppStore();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<IssueTemplate | null>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    severity: 'medium' as IssueSeverity,
-    category: '',
-  });
+  const [deletingTemplate, setDeletingTemplate] = useState<IssueTemplate | null>(null);
+  const [formData, setFormData] = useState<TemplateFormData>(initialFormData);
 
   const handleAdd = () => {
     setEditingTemplate(null);
-    setFormData({
-      title: '',
-      description: '',
-      severity: 'medium',
-      category: '',
-    });
+    setFormData(initialFormData);
     setDialogOpen(true);
   };
 
@@ -68,27 +73,39 @@ export default function TemplateManager() {
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setIssueTemplates(issueTemplates.filter((t) => t.id !== id));
+  const handleDeleteClick = (template: IssueTemplate) => {
+    setDeletingTemplate(template);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deletingTemplate) {
+      deleteIssueTemplate(deletingTemplate.id);
+    }
+    setDeleteDialogOpen(false);
+    setDeletingTemplate(null);
   };
 
   const handleSave = () => {
     if (!formData.title.trim() || !formData.description.trim()) return;
 
     if (editingTemplate) {
-      setIssueTemplates(
-        issueTemplates.map((t) =>
-          t.id === editingTemplate.id ? { ...t, ...formData } : t
-        )
-      );
+      updateIssueTemplate(editingTemplate.id, formData);
     } else {
-      const newTemplate: IssueTemplate = {
-        id: `template-${generateId()}`,
-        ...formData,
-      };
-      setIssueTemplates([...issueTemplates, newTemplate]);
+      addIssueTemplate(formData);
     }
     setDialogOpen(false);
+    setEditingTemplate(null);
+  };
+
+  const handleCancel = () => {
+    setDialogOpen(false);
+    setEditingTemplate(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setDeletingTemplate(null);
   };
 
   return (
@@ -134,7 +151,7 @@ export default function TemplateManager() {
                         variant="ghost"
                         size="sm"
                         className="text-severity-blocker hover:text-severity-blocker hover:bg-severity-blocker/10"
-                        onClick={() => handleDelete(template.id)}
+                        onClick={() => handleDeleteClick(template)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -156,10 +173,10 @@ export default function TemplateManager() {
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+      <Dialog open={dialogOpen} onClose={handleCancel}>
         <DialogHeader
           title={editingTemplate ? '编辑模板' : '新增模板'}
-          onClose={() => setDialogOpen(false)}
+          onClose={handleCancel}
         />
         <DialogContent className="bg-dark-900/95">
           <div className="space-y-4">
@@ -220,7 +237,7 @@ export default function TemplateManager() {
         <DialogFooter className="border-t border-dark-700/50">
           <Button
             variant="outline"
-            onClick={() => setDialogOpen(false)}
+            onClick={handleCancel}
             className="border-dark-700/50 bg-dark-800/50 text-dark-300 hover:bg-dark-700/50 hover:text-dark-100"
           >
             取消
@@ -231,6 +248,30 @@ export default function TemplateManager() {
             className="bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50"
           >
             {editingTemplate ? '保存修改' : '创建模板'}
+          </Button>
+        </DialogFooter>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+        <DialogHeader title="确认删除" onClose={handleDeleteCancel} />
+        <DialogContent className="bg-dark-900/95">
+          <p className="text-dark-300">
+            确定要删除模板 <span className="font-medium text-dark-100">"{deletingTemplate?.title}"</span> 吗？此操作不可撤销。
+          </p>
+        </DialogContent>
+        <DialogFooter className="border-t border-dark-700/50">
+          <Button
+            variant="outline"
+            onClick={handleDeleteCancel}
+            className="border-dark-700/50 bg-dark-800/50 text-dark-300 hover:bg-dark-700/50 hover:text-dark-100"
+          >
+            取消
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            className="bg-severity-blocker hover:bg-severity-blocker/90 text-white"
+          >
+            确认删除
           </Button>
         </DialogFooter>
       </Dialog>

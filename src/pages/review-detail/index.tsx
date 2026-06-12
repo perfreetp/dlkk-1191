@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, GitBranch, Users, Clock, AlertTriangle, AlertCircle, Minus, FileText, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { ArrowLeft, GitBranch, Users, Clock, AlertTriangle, AlertCircle, Minus, FileText, CheckCircle, XCircle, MessageSquare, Timer } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAppStore, getStatusText } from '@/store';
-import { useReviewStore } from '@/store/useReviewStore';
-import { formatDateTime, cn } from '@/utils';
+import { useAppStore, getStatusText, getSeverityText } from '@/store';
+import { formatDateTime, cn, formatDuration } from '@/utils';
 import { Card, Badge, Tabs, TabsList, TabsTrigger, TabsContent, Empty, Button, Dialog, DialogHeader, DialogContent, DialogFooter } from '@/components';
 import IssuesTab from './IssuesTab';
 import RiskTab from './RiskTab';
 import IssueDetail from './IssueDetail';
-import type { Issue, IssueSeverity } from '@/types';
+import type { IssueSeverity } from '@/types';
 
 const severityToTheme: Record<IssueSeverity, string> = {
   critical: 'blocker',
@@ -21,15 +20,47 @@ const severityToTheme: Record<IssueSeverity, string> = {
 export default function ReviewDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { reviews, issues, setCurrentReview, currentReview } = useAppStore();
-  const { fetchReview, approveReview, rejectReview, requestInfo, loading } = useReviewStore();
+  const { reviews, issues, setCurrentReview, currentReview, fetchReview, approveReview, rejectReview, requestInfo, loading } = useAppStore();
   const [activeTab, setActiveTab] = useState('issues');
-  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+  const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
   const [actionModal, setActionModal] = useState<{ type: 'approve' | 'reject' | 'requestInfo'; open: boolean }>({ type: 'approve', open: false });
   const [actionComment, setActionComment] = useState('');
 
   const review = reviews.find((r) => r.id === id) || currentReview;
-  const reviewIssues = issues.filter((issue) => issue.reviewId === (id || review?.id));
+  const reviewIssues = useMemo(
+    () => issues.filter((issue) => issue.reviewId === (id || review?.id)),
+    [issues, id, review?.id]
+  );
+
+  const issueStats = useMemo(() => {
+    const stats = {
+      total: reviewIssues.length,
+      critical: 0,
+      high: 0,
+      medium: 0,
+      low: 0,
+      info: 0,
+    };
+    reviewIssues.forEach((issue) => {
+      if (issue.severity in stats) {
+        (stats as any)[issue.severity]++;
+      }
+    });
+    return stats;
+  }, [reviewIssues]);
+
+  const reviewDuration = useMemo(() => {
+    if (!review || !review.createdAt) return null;
+    const endTime = review.status === 'completed' || review.status === 'approved' || review.status === 'rejected'
+      ? review.updatedAt
+      : null;
+    if (!endTime) return null;
+    const start = new Date(review.createdAt).getTime();
+    const end = new Date(endTime).getTime();
+    const durationMs = end - start;
+    const durationMinutes = Math.floor(durationMs / (1000 * 60));
+    return formatDuration(durationMinutes);
+  }, [review]);
 
   useEffect(() => {
     if (id) {
@@ -45,7 +76,7 @@ export default function ReviewDetailPage() {
 
   const handleAction = () => {
     if (!id) return;
-    const comment = actionComment.trim() || undefined;
+    const comment = actionComment.trim() || '';
     switch (actionModal.type) {
       case 'approve':
         approveReview(id, comment);
@@ -76,7 +107,7 @@ export default function ReviewDetailPage() {
     );
   }
 
-  const currentIssue = selectedIssue || reviewIssues[0] || null;
+  const currentIssueId = selectedIssueId || reviewIssues[0]?.id || null;
 
   return (
     <div className="min-h-screen bg-dark-950 animate-fade-in">
@@ -121,6 +152,12 @@ export default function ReviewDetailPage() {
                   <Clock className="w-4 h-4" />
                   <span>创建于 {review?.createdAt ? formatDateTime(review.createdAt) : ''}</span>
                 </div>
+                {reviewDuration && (
+                  <div className="flex items-center gap-2">
+                    <Timer className="w-4 h-4" />
+                    <span>评审耗时 {reviewDuration}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -151,42 +188,51 @@ export default function ReviewDetailPage() {
             </div>
           </div>
 
-          {review && review.issueCount !== undefined && review.issueCount > 0 && (
+          {issueStats.total > 0 && (
             <div className="flex items-center gap-6 mt-6 p-4 glass-card rounded-lg animate-slide-up">
-              {review.criticalIssueCount !== undefined && review.criticalIssueCount > 0 && (
+              {issueStats.critical > 0 && (
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-severity-blocker" />
                   <span className="text-lg font-bold text-severity-blocker">
-                    {review.criticalIssueCount}
+                    {issueStats.critical}
                   </span>
                   <span className="text-sm text-dark-400">严重</span>
                 </div>
               )}
-              {review.highIssueCount !== undefined && review.highIssueCount > 0 && (
+              {issueStats.high > 0 && (
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-severity-critical" />
                   <span className="text-lg font-bold text-severity-critical">
-                    {review.highIssueCount}
+                    {issueStats.high}
                   </span>
                   <span className="text-sm text-dark-400">高危</span>
                 </div>
               )}
-              {review.mediumIssueCount !== undefined && review.mediumIssueCount > 0 && (
+              {issueStats.medium > 0 && (
                 <div className="flex items-center gap-2">
                   <Minus className="w-5 h-5 text-severity-warning" />
                   <span className="text-lg font-bold text-severity-warning">
-                    {review.mediumIssueCount}
+                    {issueStats.medium}
                   </span>
                   <span className="text-sm text-dark-400">中等</span>
                 </div>
               )}
-              {review.lowIssueCount !== undefined && review.lowIssueCount > 0 && (
+              {issueStats.low > 0 && (
                 <div className="flex items-center gap-2">
                   <Minus className="w-5 h-5 text-severity-info" />
                   <span className="text-lg font-bold text-severity-info">
-                    {review.lowIssueCount}
+                    {issueStats.low}
                   </span>
                   <span className="text-sm text-dark-400">低</span>
+                </div>
+              )}
+              {issueStats.info > 0 && (
+                <div className="flex items-center gap-2">
+                  <Minus className="w-5 h-5 text-severity-info" />
+                  <span className="text-lg font-bold text-severity-info">
+                    {issueStats.info}
+                  </span>
+                  <span className="text-sm text-dark-400">提示</span>
                 </div>
               )}
             </div>
@@ -206,8 +252,8 @@ export default function ReviewDetailPage() {
               <TabsContent value="issues">
                 <IssuesTab
                   reviewId={id || review?.id || ''}
-                  onSelectIssue={setSelectedIssue}
-                  selectedIssueId={selectedIssue?.id}
+                  onSelectIssueId={setSelectedIssueId}
+                  selectedIssueId={selectedIssueId || undefined}
                 />
               </TabsContent>
               <TabsContent value="risk">
@@ -215,13 +261,13 @@ export default function ReviewDetailPage() {
               </TabsContent>
             </div>
 
-            {activeTab === 'issues' && currentIssue && (
+            {activeTab === 'issues' && currentIssueId && (
               <div className="w-[480px] flex-shrink-0">
                 <div className="sticky top-6">
                   <Card className="glass-card h-[calc(100vh-240px)] overflow-hidden animate-fade-in">
                     <IssueDetail
-                      issue={currentIssue}
-                      onClose={() => setSelectedIssue(null)}
+                      issueId={currentIssueId}
+                      onClose={() => setSelectedIssueId(null)}
                     />
                   </Card>
                 </div>
