@@ -2,9 +2,15 @@ import { Trophy, Clock, CheckCircle, AlertCircle, TrendingUp } from 'lucide-reac
 import { useAppStore } from '@/store';
 import { cn } from '@/utils';
 import { Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Avatar } from '@/components';
+import type { RecordFilter } from '@/types';
 
-export default function UserStatsTable() {
-  const { userStats } = useAppStore();
+interface UserStatsTableProps {
+  filters?: RecordFilter;
+}
+
+export default function UserStatsTable({ filters = {} }: UserStatsTableProps) {
+  const { getFilteredUserStats } = useAppStore();
+  const userStats = getFilteredUserStats(filters);
 
   const sortedStats = [...userStats].sort((a, b) => b.resolvedIssues - a.resolvedIssues);
 

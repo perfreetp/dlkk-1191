@@ -1,14 +1,15 @@
 import { useState, useMemo } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Lock } from 'lucide-react';
 import { useAppStore } from '@/store';
-import { formatDateTime } from '@/utils';
+import { formatDateTime, cn } from '@/utils';
 import { Button, Input, Avatar } from '@/components';
 
 interface CommentSectionProps {
   issueId: string;
+  disabled?: boolean;
 }
 
-export default function CommentSection({ issueId }: CommentSectionProps) {
+export default function CommentSection({ issueId, disabled = false }: CommentSectionProps) {
   const { issues, addComment } = useAppStore();
   const [newComment, setNewComment] = useState('');
 
@@ -19,14 +20,22 @@ export default function CommentSection({ issueId }: CommentSectionProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (disabled || !newComment.trim()) return;
     addComment(issueId, newComment.trim(), 'current-user', '当前用户');
     setNewComment('');
   };
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <h4 className="font-medium text-dark-100">评论 ({comments.length})</h4>
+      <div className="flex items-center justify-between">
+        <h4 className="font-medium text-dark-100">评论 ({comments.length})</h4>
+        {disabled && (
+          <div className="flex items-center gap-1 text-xs text-dark-500">
+            <Lock className="w-3 h-3" />
+            <span>已锁定</span>
+          </div>
+        )}
+      </div>
 
       <div className="space-y-4 max-h-80 overflow-y-auto scrollbar-thin">
         {comments.length === 0 ? (
@@ -53,17 +62,18 @@ export default function CommentSection({ issueId }: CommentSectionProps) {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className={cn('flex gap-2', disabled && 'opacity-50')}>
         <Input
-          placeholder="添加评论..."
+          placeholder={disabled ? '评审已完成，无法添加评论' : '添加评论...'}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          className="flex-1 bg-dark-800/50 border-dark-700/50 text-dark-100 placeholder:text-dark-500"
+          disabled={disabled}
+          className="flex-1 bg-dark-800/50 border-dark-700/50 text-dark-100 placeholder:text-dark-500 disabled:cursor-not-allowed"
         />
         <Button
           type="submit"
-          disabled={!newComment.trim()}
-          className="bg-primary-500 hover:bg-primary-600 text-white"
+          disabled={disabled || !newComment.trim()}
+          className="bg-primary-500 hover:bg-primary-600 text-white disabled:cursor-not-allowed"
         >
           <Send className="w-4 h-4 mr-2" />
           发送

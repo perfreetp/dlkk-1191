@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { X, UserPlus, Clock, FileText, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { X, UserPlus, Clock, FileText, AlertTriangle, CheckCircle, XCircle, Lock } from 'lucide-react';
 import { useAppStore, getSeverityText } from '@/store';
-import { formatDateTime, getFileIcon } from '@/utils';
+import { formatDateTime, getFileIcon, cn } from '@/utils';
 import { Badge, Button, CodeBlock, Select, Empty } from '@/components';
 import CommentSection from './CommentSection';
 import AssignDialog from './AssignDialog';
@@ -10,6 +10,7 @@ import type { IssueSeverity } from '@/types';
 interface IssueDetailProps {
   issueId: string;
   onClose: () => void;
+  disabled?: boolean;
 }
 
 const severityToTheme: Record<IssueSeverity, string> = {
@@ -20,7 +21,7 @@ const severityToTheme: Record<IssueSeverity, string> = {
   info: 'info',
 };
 
-export default function IssueDetail({ issueId, onClose }: IssueDetailProps) {
+export default function IssueDetail({ issueId, onClose, disabled = false }: IssueDetailProps) {
   const { issues, updateIssueStatus } = useAppStore();
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
 
@@ -30,6 +31,7 @@ export default function IssueDetail({ issueId, onClose }: IssueDetailProps) {
   );
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (disabled) return;
     updateIssueStatus(issueId, e.target.value);
   };
 
@@ -72,7 +74,15 @@ export default function IssueDetail({ issueId, onClose }: IssueDetailProps) {
   return (
     <div className="h-full flex flex-col bg-transparent">
       <div className="flex items-center justify-between p-4 border-b border-dark-700/50">
-        <h3 className="font-semibold text-dark-100">问题详情</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-dark-100">问题详情</h3>
+          {disabled && (
+            <div className="flex items-center gap-1 text-xs text-dark-500">
+              <Lock className="w-3 h-3" />
+              <span>已锁定</span>
+            </div>
+          )}
+        </div>
         <button
           type="button"
           onClick={onClose}
@@ -97,7 +107,8 @@ export default function IssueDetail({ issueId, onClose }: IssueDetailProps) {
               <Select
                 value={issue.status}
                 onChange={handleStatusChange}
-                className="w-32 h-8 text-sm bg-dark-800/50 border-dark-700/50 text-dark-100"
+                disabled={disabled}
+                className="w-32 h-8 text-sm bg-dark-800/50 border-dark-700/50 text-dark-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="open">待处理</option>
                 <option value="in_progress">处理中</option>
@@ -145,8 +156,12 @@ export default function IssueDetail({ issueId, onClose }: IssueDetailProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setAssignDialogOpen(true)}
-              className="border-dark-700/50 text-dark-300 hover:bg-dark-800/50 hover:text-dark-100"
+              onClick={() => !disabled && setAssignDialogOpen(true)}
+              disabled={disabled}
+              className={cn(
+                'border-dark-700/50 text-dark-300 hover:bg-dark-800/50 hover:text-dark-100',
+                disabled && 'opacity-50 cursor-not-allowed hover:bg-transparent hover:text-dark-300'
+              )}
             >
               <UserPlus className="w-4 h-4 mr-1" />
               {issue.assignee ? '重新指派' : '指派'}
@@ -160,7 +175,7 @@ export default function IssueDetail({ issueId, onClose }: IssueDetailProps) {
         </div>
 
         <div>
-          <CommentSection issueId={issue.id} />
+          <CommentSection issueId={issue.id} disabled={disabled} />
         </div>
       </div>
 

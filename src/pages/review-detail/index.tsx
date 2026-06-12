@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, GitBranch, Users, Clock, AlertTriangle, AlertCircle, Minus, FileText, CheckCircle, XCircle, MessageSquare, Timer } from 'lucide-react';
+import { ArrowLeft, GitBranch, Users, Clock, AlertTriangle, AlertCircle, Minus, FileText, CheckCircle, XCircle, MessageSquare, Timer, CheckCircle2 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore, getStatusText, getSeverityText } from '@/store';
 import { formatDateTime, cn, formatDuration } from '@/utils';
 import { Card, Badge, Tabs, TabsList, TabsTrigger, TabsContent, Empty, Button, Dialog, DialogHeader, DialogContent, DialogFooter } from '@/components';
 import IssuesTab from './IssuesTab';
 import RiskTab from './RiskTab';
+import TrackingTab from './TrackingTab';
 import IssueDetail from './IssueDetail';
-import type { IssueSeverity } from '@/types';
+import type { IssueSeverity, ReviewStatus } from '@/types';
 
 const severityToTheme: Record<IssueSeverity, string> = {
   critical: 'blocker',
@@ -16,6 +17,8 @@ const severityToTheme: Record<IssueSeverity, string> = {
   low: 'info',
   info: 'info',
 };
+
+const completedStatuses: ReviewStatus[] = ['approved', 'rejected', 'completed'];
 
 export default function ReviewDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +34,11 @@ export default function ReviewDetailPage() {
     () => issues.filter((issue) => issue.reviewId === (id || review?.id)),
     [issues, id, review?.id]
   );
+
+  const isCompleted = useMemo(() => {
+    if (!review) return false;
+    return completedStatuses.includes(review.status);
+  }, [review]);
 
   const issueStats = useMemo(() => {
     const stats = {
@@ -126,7 +134,11 @@ export default function ReviewDetailPage() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-2xl font-bold text-dark-100">{review?.title}</h1>
-                <Badge className="bg-primary-500/20 text-primary-400 border border-primary-500/30">
+                <Badge className={cn(
+                  isCompleted
+                    ? 'bg-severity-info/20 text-severity-info border border-severity-info/30'
+                    : 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                )}>
                   {getStatusText(review?.status || '')}
                 </Badge>
               </div>
@@ -162,31 +174,52 @@ export default function ReviewDetailPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                onClick={() => openActionModal('requestInfo')}
-                className="border-dark-700/50 text-dark-300 hover:bg-dark-800/50 hover:text-dark-100"
-              >
-                <MessageSquare className="w-4 h-4 mr-2" />
-                要求补充
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => openActionModal('reject')}
-                className="border-severity-blocker/50 text-severity-blocker hover:bg-severity-blocker/20"
-              >
-                <XCircle className="w-4 h-4 mr-2" />
-                驳回评审
-              </Button>
-              <Button
-                onClick={() => openActionModal('approve')}
-                className="bg-severity-info hover:bg-severity-info/80 text-white"
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                通过评审
-              </Button>
+              {isCompleted ? (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-severity-info/10 border border-severity-info/30">
+                  <CheckCircle2 className="w-5 h-5 text-severity-info" />
+                  <span className="text-sm font-medium text-severity-info">已完成</span>
+                </div>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => openActionModal('requestInfo')}
+                    className="border-dark-700/50 text-dark-300 hover:bg-dark-800/50 hover:text-dark-100"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    要求补充
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => openActionModal('reject')}
+                    className="border-severity-blocker/50 text-severity-blocker hover:bg-severity-blocker/20"
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    驳回评审
+                  </Button>
+                  <Button
+                    onClick={() => openActionModal('approve')}
+                    className="bg-severity-info hover:bg-severity-info/80 text-white"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    通过评审
+                  </Button>
+                </>
+              )}
             </div>
           </div>
+
+          {isCompleted && (
+            <div className="mt-4 p-4 rounded-lg bg-severity-info/10 border border-severity-info/30 flex items-center gap-3 animate-fade-in">
+              <CheckCircle2 className="w-6 h-6 text-severity-info flex-shrink-0" />
+              <div>
+                <p className="font-medium text-severity-info">评审已完成</p>
+                <p className="text-sm text-dark-400 mt-1">
+                  此评审已结束，所有操作已被锁定。如需修改，请重新发起评审。
+                </p>
+              </div>
+            </div>
+          )}
 
           {issueStats.total > 0 && (
             <div className="flex items-center gap-6 mt-6 p-4 glass-card rounded-lg animate-slide-up">
@@ -244,6 +277,7 @@ export default function ReviewDetailPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="glass-card">
             <TabsTrigger value="issues">问题列表 ({reviewIssues.length})</TabsTrigger>
+            <TabsTrigger value="tracking">整改跟踪</TabsTrigger>
             <TabsTrigger value="risk">风险分析</TabsTrigger>
           </TabsList>
 
@@ -254,7 +288,11 @@ export default function ReviewDetailPage() {
                   reviewId={id || review?.id || ''}
                   onSelectIssueId={setSelectedIssueId}
                   selectedIssueId={selectedIssueId || undefined}
+                  disabled={isCompleted}
                 />
+              </TabsContent>
+              <TabsContent value="tracking">
+                <TrackingTab reviewId={id || review?.id || ''} />
               </TabsContent>
               <TabsContent value="risk">
                 <RiskTab reviewId={id || review?.id || ''} />
@@ -268,6 +306,7 @@ export default function ReviewDetailPage() {
                     <IssueDetail
                       issueId={currentIssueId}
                       onClose={() => setSelectedIssueId(null)}
+                      disabled={isCompleted}
                     />
                   </Card>
                 </div>

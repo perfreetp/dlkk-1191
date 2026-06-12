@@ -11,6 +11,7 @@ import type {
   UserStats,
   HistoryRecord,
   ReviewFilter,
+  RecordFilter,
   IssueTemplate,
   MandatoryCheck,
   IssueSeverity,
@@ -32,6 +33,7 @@ interface AppState {
   userStats: UserStats[];
   historyRecords: HistoryRecord[];
   reviewFilter: ReviewFilter;
+  recordFilter: RecordFilter;
   issueTemplates: IssueTemplate[];
   mandatoryChecks: MandatoryCheck[];
   currentTab: string;
@@ -50,6 +52,7 @@ interface AppState {
   setUserStats: (stats: UserStats[]) => void;
   setHistoryRecords: (records: HistoryRecord[]) => void;
   setReviewFilter: (filter: Partial<ReviewFilter>) => void;
+  setRecordFilter: (filter: Partial<RecordFilter>) => void;
   setIssueTemplates: (templates: IssueTemplate[]) => void;
   setMandatoryChecks: (checks: MandatoryCheck[]) => void;
   setCurrentTab: (tab: string) => void;
@@ -67,6 +70,9 @@ interface AppState {
   addComment: (issueId: string, content: string, userId: string, userName: string) => void;
   assignIssue: (issueId: string, assignee: string) => void;
   updateIssueStatus: (issueId: string, status: string) => void;
+  batchUpdateStatus: (issueIds: string[], status: string) => void;
+  batchAssignIssue: (issueIds: string[], assignee: string) => void;
+  batchAddComment: (issueIds: string[], content: string, userId: string, userName: string) => void;
   fetchReview: (id: string) => void;
   approveReview: (reviewId: string, comment: string) => void;
   rejectReview: (reviewId: string, comment: string) => void;
@@ -78,6 +84,14 @@ interface AppState {
   getAverageReviewTime: () => number;
   getAverageReviewTimeText: () => string;
   getCompletedReviews: () => Review[];
+  getFilteredReviews: (filters: RecordFilter) => Review[];
+  getFilteredIssues: (filters: RecordFilter) => Issue[];
+  getFilteredHistory: (filters: RecordFilter) => HistoryRecord[];
+  getFilteredUserStats: (filters: RecordFilter) => UserStats[];
+  getIssuesByRuleId: (ruleId: string) => Issue[];
+  getIssuesByRuleName: (ruleName: string) => Issue[];
+  getReviewsByRuleId: (ruleId: string) => Review[];
+  toggleRuleMandatory: (id: string) => void;
 }
 
 const mockRepositories: Repository[] = [
@@ -552,6 +566,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   userStats: mockUserStats,
   historyRecords: mockHistoryRecords,
   reviewFilter: {},
+  recordFilter: {},
   issueTemplates: mockIssueTemplates,
   mandatoryChecks: mockMandatoryChecks,
   currentTab: 'issues',
@@ -570,6 +585,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setUserStats: (stats) => set({ userStats: stats }),
   setHistoryRecords: (records) => set({ historyRecords: records }),
   setReviewFilter: (filter) => set((state) => ({ reviewFilter: { ...state.reviewFilter, ...filter } })),
+  setRecordFilter: (filter) => set((state) => ({ recordFilter: { ...state.recordFilter, ...filter } })),
   setIssueTemplates: (templates) => set({ issueTemplates: templates }),
   setMandatoryChecks: (checks) => set({ mandatoryChecks: checks }),
   setCurrentTab: (tab) => set({ currentTab: tab }),
@@ -721,6 +737,113 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       const updatedCurrentReview =
         state.currentReview?.id === reviewId
+          ? { ...state.currentReview, updatedAt: now }
+          : state.currentReview;
+
+      return {
+        issues: updatedIssues,
+        reviews: updatedReviews,
+        currentReview: updatedCurrentReview,
+      };
+    }),
+
+  batchUpdateStatus: (issueIds, status) =>
+    set((state) => {
+      const now = new Date().toISOString();
+      const reviewIds = new Set<string>();
+
+      const updatedIssues = state.issues.map((iss) => {
+        if (issueIds.includes(iss.id)) {
+          if (iss.reviewId) {
+            reviewIds.add(iss.reviewId);
+          }
+          return { ...iss, status: status as Issue['status'], updatedAt: now };
+        }
+        return iss;
+      });
+
+      const updatedReviews = state.reviews.map((r) =>
+        reviewIds.has(r.id) ? { ...r, updatedAt: now } : r
+      );
+
+      const updatedCurrentReview =
+        state.currentReview && reviewIds.has(state.currentReview.id)
+          ? { ...state.currentReview, updatedAt: now }
+          : state.currentReview;
+
+      return {
+        issues: updatedIssues,
+        reviews: updatedReviews,
+        currentReview: updatedCurrentReview,
+      };
+    }),
+
+  batchAssignIssue: (issueIds, assignee) =>
+    set((state) => {
+      const now = new Date().toISOString();
+      const reviewIds = new Set<string>();
+
+      const updatedIssues = state.issues.map((iss) => {
+        if (issueIds.includes(iss.id)) {
+          if (iss.reviewId) {
+            reviewIds.add(iss.reviewId);
+          }
+          return { ...iss, assignee, updatedAt: now };
+        }
+        return iss;
+      });
+
+      const updatedReviews = state.reviews.map((r) =>
+        reviewIds.has(r.id) ? { ...r, updatedAt: now } : r
+      );
+
+      const updatedCurrentReview =
+        state.currentReview && reviewIds.has(state.currentReview.id)
+          ? { ...state.currentReview, updatedAt: now }
+          : state.currentReview;
+
+      return {
+        issues: updatedIssues,
+        reviews: updatedReviews,
+        currentReview: updatedCurrentReview,
+      };
+    }),
+
+  batchAddComment: (issueIds, content, userId, userName) =>
+    set((state) => {
+      const now = new Date().toISOString();
+      const reviewIds = new Set<string>();
+
+      const updatedIssues = state.issues.map((iss) => {
+        if (issueIds.includes(iss.id)) {
+          if (iss.reviewId) {
+            reviewIds.add(iss.reviewId);
+          }
+          return {
+            ...iss,
+            comments: [
+              ...iss.comments,
+              {
+                id: `c${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                issueId: iss.id,
+                userId,
+                userName,
+                content,
+                createdAt: now,
+              },
+            ],
+            updatedAt: now,
+          };
+        }
+        return iss;
+      });
+
+      const updatedReviews = state.reviews.map((r) =>
+        reviewIds.has(r.id) ? { ...r, updatedAt: now } : r
+      );
+
+      const updatedCurrentReview =
+        state.currentReview && reviewIds.has(state.currentReview.id)
           ? { ...state.currentReview, updatedAt: now }
           : state.currentReview;
 
@@ -959,6 +1082,64 @@ export const useAppStore = create<AppState>((set, get) => ({
       (r) => r.status === 'completed' || r.status === 'approved' || r.status === 'rejected'
     );
   },
+
+  getFilteredReviews: (filters) => {
+    const state = get();
+    return state.reviews.filter((review) => {
+      if (filters.repositoryId && review.repositoryId !== filters.repositoryId) return false;
+      if (filters.status && review.status !== filters.status) return false;
+      if (filters.startDate) {
+        const reviewDate = review.completedAt || review.updatedAt;
+        if (new Date(reviewDate) < new Date(filters.startDate)) return false;
+      }
+      if (filters.endDate) {
+        const reviewDate = review.completedAt || review.updatedAt;
+        const endDate = new Date(filters.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        if (new Date(reviewDate) > endDate) return false;
+      }
+      return true;
+    });
+  },
+
+  getFilteredIssues: (filters) => {
+    const state = get();
+    const filteredReviewIds = new Set(state.getFilteredReviews(filters).map((r) => r.id));
+    return state.issues.filter((issue) => filteredReviewIds.has(issue.reviewId || ''));
+  },
+
+  getFilteredHistory: (filters) => {
+    const state = get();
+    const filteredReviewIds = new Set(state.getFilteredReviews(filters).map((r) => r.id));
+    return state.historyRecords.filter((record) => filteredReviewIds.has(record.reviewId));
+  },
+
+  getFilteredUserStats: (filters) => {
+    const state = get();
+    if (!filters.reviewerId) return state.userStats;
+    return state.userStats.filter((u) => u.userId === filters.reviewerId);
+  },
+
+  getIssuesByRuleId: (ruleId) => {
+    return get().issues.filter((i) => i.ruleId === ruleId);
+  },
+
+  getIssuesByRuleName: (ruleName) => {
+    return get().issues.filter((i) => i.title === ruleName);
+  },
+
+  getReviewsByRuleId: (ruleId) => {
+    const state = get();
+    const issueReviewIds = new Set(
+      state.issues.filter((i) => i.ruleId === ruleId).map((i) => i.reviewId)
+    );
+    return state.reviews.filter((r) => issueReviewIds.has(r.id));
+  },
+
+  toggleRuleMandatory: (id) =>
+    set((state) => ({
+      rules: state.rules.map((r) => (r.id === id ? { ...r, isMandatory: !r.isMandatory } : r)),
+    })),
 }));
 
 const severityToTheme: Record<IssueSeverity, string> = {

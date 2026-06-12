@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { AlertTriangle, AlertCircle, Minus, Filter, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { AlertTriangle, AlertCircle, Minus, Filter, ChevronDown, ChevronUp, Info, Lock } from 'lucide-react';
 import { useAppStore, getSeverityText, getStatusText } from '@/store';
 import { groupIssuesBySeverity, formatRelativeTime, truncateText, cn } from '@/utils';
 import { Card, Badge, Select, Empty } from '@/components';
@@ -9,6 +9,7 @@ interface IssuesTabProps {
   reviewId: string;
   onSelectIssueId: (issueId: string) => void;
   selectedIssueId?: string;
+  disabled?: boolean;
 }
 
 const severityOrder: IssueSeverity[] = ['critical', 'high', 'medium', 'low', 'info'];
@@ -29,7 +30,7 @@ const severityIcons: Record<IssueSeverity, typeof AlertTriangle> = {
   info: Info,
 };
 
-export default function IssuesTab({ reviewId, onSelectIssueId, selectedIssueId }: IssuesTabProps) {
+export default function IssuesTab({ reviewId, onSelectIssueId, selectedIssueId, disabled = false }: IssuesTabProps) {
   const { issues } = useAppStore();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expandedGroups, setExpandedGroups] = useState<Record<IssueSeverity, boolean>>({
@@ -83,11 +84,18 @@ export default function IssuesTab({ reviewId, onSelectIssueId, selectedIssueId }
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-dark-400" />
           <span className="text-sm text-dark-300">共 {filteredIssues.length} 个问题</span>
+          {disabled && (
+            <div className="flex items-center gap-1 ml-2 text-xs text-dark-500">
+              <Lock className="w-3 h-3" />
+              <span>已锁定</span>
+            </div>
+          )}
         </div>
         <Select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-40 bg-dark-800/50 border-dark-700/50 text-dark-100"
+          disabled={disabled}
+          className="w-40 bg-dark-800/50 border-dark-700/50 text-dark-100 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <option value="all">全部状态</option>
           <option value="open">待处理</option>
@@ -111,8 +119,10 @@ export default function IssuesTab({ reviewId, onSelectIssueId, selectedIssueId }
               onClick={() => toggleGroup(severity)}
               className={cn(
                 "w-full flex items-center justify-between p-3 rounded-lg transition-all",
-                "bg-dark-800/50 hover:bg-dark-800/80 border border-dark-700/50"
+                "bg-dark-800/50 hover:bg-dark-800/80 border border-dark-700/50",
+                disabled && "opacity-60 cursor-not-allowed hover:bg-dark-800/50"
               )}
+              disabled={disabled}
             >
               <div className="flex items-center gap-3">
                 <Icon className={cn("w-5 h-5", getSeverityClass(severity))} />
@@ -135,12 +145,15 @@ export default function IssuesTab({ reviewId, onSelectIssueId, selectedIssueId }
                 {groupIssues.map((issue, issueIndex) => (
                   <div
                     key={issue.id}
-                    onClick={() => onSelectIssueId(issue.id)}
+                    onClick={() => !disabled && onSelectIssueId(issue.id)}
                     className={cn(
-                      "p-4 rounded-lg border cursor-pointer transition-all glass-card glass-card-hover animate-fade-in",
+                      "p-4 rounded-lg border transition-all glass-card glass-card-hover animate-fade-in",
                       selectedIssueId === issue.id
                         ? 'border-primary-500/50 bg-primary-500/10'
-                        : 'border-dark-700/50'
+                        : 'border-dark-700/50',
+                      disabled
+                        ? 'cursor-not-allowed opacity-60 hover:border-dark-700/50 hover:bg-dark-800/30'
+                        : 'cursor-pointer'
                     )}
                     style={{ animationDelay: `${issueIndex * 30}ms` }}
                   >

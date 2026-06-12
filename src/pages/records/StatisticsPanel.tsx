@@ -1,7 +1,9 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { BarChart3, PieChart as PieChartIcon, TrendingUp, Clock } from 'lucide-react';
 import { useAppStore } from '@/store';
+import { formatDuration } from '@/utils';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components';
+import type { RecordFilter } from '@/types';
 
 const COLORS = ['#e53935', '#fb8c00', '#fdd835', '#3975e2', '#43a047'];
 
@@ -15,24 +17,36 @@ const chartTooltipStyle = {
 
 const legendStyle = { color: '#9fb3c8' };
 
-export default function StatisticsPanel() {
-  const { reviews, issues, getAverageReviewTimeText, getCompletedReviews } = useAppStore();
+interface StatisticsPanelProps {
+  filters?: RecordFilter;
+}
 
-  const completedReviews = getCompletedReviews();
+export default function StatisticsPanel({ filters = {} }: StatisticsPanelProps) {
+  const { getFilteredReviews, getFilteredIssues, getFilteredHistory } = useAppStore();
+
+  const filteredReviews = getFilteredReviews(filters);
+  const filteredIssues = getFilteredIssues(filters);
+
+  const completedReviews = filteredReviews.filter(
+    (r) => r.status === 'completed' || r.status === 'approved' || r.status === 'rejected'
+  );
+
+  const approvedReviews = filteredReviews.filter((r) => r.status === 'approved').length;
+  const passRate = completedReviews.length > 0 ? Math.round((approvedReviews / completedReviews.length) * 100) : 0;
 
   const statusDistribution = [
-    { name: '待评审', value: reviews.filter((r) => r.status === 'pending').length },
-    { name: '评审中', value: reviews.filter((r) => r.status === 'in_progress').length },
-    { name: '已完成', value: reviews.filter((r) => r.status === 'completed').length },
-    { name: '已通过', value: reviews.filter((r) => r.status === 'approved').length },
-    { name: '已拒绝', value: reviews.filter((r) => r.status === 'rejected').length },
+    { name: '待评审', value: filteredReviews.filter((r) => r.status === 'pending').length },
+    { name: '进行中', value: filteredReviews.filter((r) => r.status === 'in_progress').length },
+    { name: '已完成', value: filteredReviews.filter((r) => r.status === 'completed').length },
+    { name: '已通过', value: filteredReviews.filter((r) => r.status === 'approved').length },
+    { name: '已驳回', value: filteredReviews.filter((r) => r.status === 'rejected').length },
   ];
 
   const severityDistribution = [
-    { name: '严重', value: issues.filter((i) => i.severity === 'critical').length },
-    { name: '高', value: issues.filter((i) => i.severity === 'high').length },
-    { name: '中', value: issues.filter((i) => i.severity === 'medium').length },
-    { name: '低', value: issues.filter((i) => i.severity === 'low').length },
+    { name: '严重', value: filteredIssues.filter((i) => i.severity === 'critical').length },
+    { name: '高', value: filteredIssues.filter((i) => i.severity === 'high').length },
+    { name: '中', value: filteredIssues.filter((i) => i.severity === 'medium').length },
+    { name: '低', value: filteredIssues.filter((i) => i.severity === 'low').length },
   ];
 
   const monthlyData = [
@@ -44,11 +58,26 @@ export default function StatisticsPanel() {
     { month: '6月', 评审数: 16, 问题数: 58, 修复数: 50 },
   ];
 
-  const totalReviews = reviews.length;
-  const totalIssues = issues.length;
-  const resolvedIssues = issues.filter((i) => i.status === 'resolved').length;
+  const totalReviews = filteredReviews.length;
+  const totalIssues = filteredIssues.length;
+  const resolvedIssues = filteredIssues.filter((i) => i.status === 'resolved').length;
   const resolutionRate = totalIssues > 0 ? Math.round((resolvedIssues / totalIssues) * 100) : 0;
-  const averageReviewTime = getAverageReviewTimeText();
+
+  const getAverageReviewDuration = () => {
+    if (completedReviews.length === 0) return 0;
+    const totalMinutes = completedReviews.reduce((sum, review) => {
+      const startTime = new Date(review.createdAt).getTime();
+      const endTime = review.completedAt
+        ? new Date(review.completedAt).getTime()
+        : new Date(review.updatedAt).getTime();
+      const durationMs = endTime - startTime;
+      const durationMinutes = durationMs / (1000 * 60);
+      return sum + durationMinutes;
+    }, 0);
+    return Math.round(totalMinutes / completedReviews.length);
+  };
+
+  const averageReviewTime = formatDuration(getAverageReviewDuration());
 
   const statCards = [
     {
@@ -76,14 +105,14 @@ export default function StatisticsPanel() {
       bgColor: 'bg-severity-warning/20',
     },
     {
-      label: '已修复',
-      value: resolvedIssues,
+      label: '问题修复率',
+      value: `${resolutionRate}%`,
       icon: <TrendingUp className="w-6 h-6 text-severity-info" />,
       bgColor: 'bg-severity-info/20',
     },
     {
-      label: '修复率',
-      value: `${resolutionRate}%`,
+      label: '通过率',
+      value: `${passRate}%`,
       icon: <TrendingUp className="w-6 h-6 text-primary-400" />,
       bgColor: 'bg-primary-500/20',
     },

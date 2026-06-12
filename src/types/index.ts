@@ -197,6 +197,14 @@ export interface ReviewFilter {
 
 export type ReviewFilters = ReviewFilter;
 
+export interface RecordFilter {
+  repositoryId?: string;
+  reviewerId?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+}
+
 export interface IssueTemplate {
   id: string;
   title: string;
